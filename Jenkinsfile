@@ -1,28 +1,31 @@
 pipeline {
-    agent { label "dev-server" }
-    stages{
-        stage("Clone Code"){
-            steps{
-                git url: "https://github.com/LondheShubham153/node-todo-cicd.git", branch: "master"
+    agent { label 'dev-agent' }
+    stages {
+        stage('Code') {
+            steps {
+                script {
+                    properties([pipelineTriggers([pollSCM('')])])
+                }
+                git url: 'https://github.com/bhaleraoabhi27/node-todo-cicd.git', branch: 'master'
             }
         }
-        stage("Build and Test"){
-            steps{
-                sh "docker build . -t node-app-test-new"
+        stage('build and test') {
+            steps {
+                sh 'docker build . -t abhibhalerao/node-todo-app-cicd:latest'
             }
         }
-        stage("Push to Docker Hub"){
-            steps{
-                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
-                sh "docker tag node-app-test-new ${env.dockerHubUser}/node-app-test-new:latest"
-                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                sh "docker push ${env.dockerHubUser}/node-app-test-new:latest"
+        stage('login and push image') {
+            steps {
+                echo "docker hub login and push image"
+                withCredentails([usernamePassword(credentailsID:'docker-hub',passwordVariables:'dockerHubPassword',usernameVariables:'dockerHubUsername')]) {
+                    sh "docker login -u ${env.dockerHubUsername} -p ${env.dockerHubPassword}"
+                    sh "docker push abhibhalerao/node-todo-app-cicd:latest"
                 }
             }
         }
-        stage("Deploy"){
-            steps{
-                sh "docker-compose down && docker-compose up -d"
+        stage('deploy') {
+            steps {
+                sh 'docker-compose down && docker-compose up -d'
             }
         }
     }

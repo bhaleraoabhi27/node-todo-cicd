@@ -3,6 +3,9 @@ pipeline {
     stages {
         stage('code') {
             steps {
+                script {
+                    properties([pipelineTriggers([pollSCM('')])])
+                }
                 git url: 'https://github.com/bhaleraoabhi27/node-todo-cicd.git', branch: 'master'
             }
         }

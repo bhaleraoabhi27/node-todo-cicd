@@ -1,7 +1,7 @@
 pipeline {
     agent { label 'dev-agent' }
     stages {
-        stage('Code') {
+        stage('code') {
             steps {
                 script {
                     properties([pipelineTriggers([pollSCM('')])])
@@ -16,10 +16,10 @@ pipeline {
         }
         stage('login and push image') {
             steps {
-                echo "docker hub login and push image"
-                withCredentails([usernamePassword(credentailsID:'docker-hub',passwordVariables:'dockerHubPassword',usernameVariables:'dockerHubUsername')]) {
-                    sh "docker login -u ${env.dockerHubUsername} -p ${env.dockerHubPassword}"
-                    sh "docker push abhibhalerao/node-todo-app-cicd:latest"
+                echo "login into docker hub and pushing image"
+                withCredentials([usernamePassword(credentialsId:'dockerHub',passwordVariable:'dockerHubPass',usernameVariable:'dockerHubUser')]){
+                    sh idocker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}'  
+                    sh 'docker push abhibhalerao/node-todo-app-cicd:latest'
                 }
             }
         }
